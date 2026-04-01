@@ -22,5 +22,9 @@ This project demonstrates how a traditional web application can be transformed i
 
 ---
 
+### Check the Infrastucture
+- Check load Balancing verification 
+for i in {1..6}; do curl -s http://localhost:8081/api/health; echo; done (in terminal)
+
 ## Acknowledgements
 - Original Repository: https://github.com/bradtraversy/proshop-v2

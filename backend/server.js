@@ -1,3 +1,4 @@
+import os from 'os';
 import path from 'path';
 import express from 'express';
 import dotenv from 'dotenv';
@@ -34,6 +35,13 @@ app.use('/api/upload', uploadRoutes);
 app.get('/api/config/paypal', (req, res) =>
   res.send({ clientId: process.env.PAYPAL_CLIENT_ID })
 );
+
+//check load balancer
+app.get('/api/health', (req, res) => {
+  res.json({
+    hostname: os.hostname()
+  });
+});
 
 if (process.env.NODE_ENV === 'production') {
   const __dirname = path.resolve();
