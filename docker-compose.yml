@@ -19,7 +19,7 @@ services:
       start_period: 40s
 
   backend-proshopv2-1:
-    image: proshopv2-backend:v5
+    image: proshopv2-backend:v4
     container_name: backend-proshopv2-1
     expose:
       - 5000
@@ -31,12 +31,12 @@ services:
       - mongodb-proshopv2
 
   backend-proshopv2-2:
-    image: proshopv2-backend:v5
+    image: proshopv2-backend:v4
     container_name: backend-proshopv2-2
     expose:
       - 5000
     environment:
-      # - NODE_ENV=production
+      - NODE_ENV=${NODE_ENV}
       - PORT=${PORT}
       - MONGO_URI=${MONGO_URI}
       - JWT_SECRET=${JWT_SECRET}
