@@ -35,15 +35,6 @@ app.get('/api/config/paypal', (req, res) =>
   res.send({ clientId: process.env.PAYPAL_CLIENT_ID })
 );
 
-// Tambah endpoint untuk cek load balancing
-app.get('/api/instance', (req, res) => {
-  res.json({
-    instance: process.env.HOSTNAME || 'unknown',
-    pid: process.pid,
-    timestamp: new Date().toISOString()
-  });
-});
-
 if (process.env.NODE_ENV === 'production') {
   const __dirname = path.resolve();
   app.use('/uploads', express.static('/var/data/uploads'));
