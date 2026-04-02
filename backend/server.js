@@ -20,7 +20,9 @@ const app = express();
 
 // API Communication
 app.use(cors({
-  origin: 'http://192.168.65.128:8081', //change with IP nginx conf
+  origin: process.env.NODE_ENV === 'production'
+    ? process.env.CORS_ORIGIN
+    : true,
   credentials: true,
 }));
 
