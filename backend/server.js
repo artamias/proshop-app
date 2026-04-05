@@ -21,7 +21,7 @@ const app = express();
 // API Communication
 app.use(cors({
   origin: process.env.NODE_ENV === 'production'
-    ? process.env.CORS_ORIGIN
+    ? process.env.CORS_ORIGIN //set to docker compose
     : true,
   credentials: true,
 }));

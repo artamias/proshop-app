@@ -6,6 +6,7 @@ services:
   mongodb-proshopv2:
     image: mongo:latest
     container_name: mongodb-proshopv2
+    restart: unless-stopped
     volumes:
       - mongo-data:/data/db
     expose:
@@ -21,9 +22,12 @@ services:
   backend-proshopv2-1:
     image: proshopv2-backend:v6
     container_name: backend-proshopv2-1
+    restart: unless-stopped
     expose:
       - 5000
     environment:
+      - NODE_ENV=${NODE_ENV}
+      - CORS_ORIGIN=${URL}
       - PORT=${PORT}
       - MONGO_URI=${MONGO_URI}
       - JWT_SECRET=${JWT_SECRET}
@@ -33,10 +37,12 @@ services:
   backend-proshopv2-2:
     image: proshopv2-backend:v6
     container_name: backend-proshopv2-2
+    restart: unless-stopped
     expose:
       - 5000
     environment:
       - NODE_ENV=${NODE_ENV}
+      - CORS_ORIGIN=${URL}
       - PORT=${PORT}
       - MONGO_URI=${MONGO_URI}
       - JWT_SECRET=${JWT_SECRET}
@@ -45,15 +51,21 @@ services:
 
 # FRONTEND
   frontend-proshopv2:
-    image: proshopv2-frontend:v5
+    image: proshopv2-frontend:v6
     container_name: frontend-proshopv2-1
+    restart: unless-stopped
     expose:
       - 3000
+    build:
+      args:
+        - REACT_APP_BASE_URL=${URL}
+
 
 # NGINX
   nginx:
     image: nginx:latest
     container_name: nginx-proshopv2
+    restart: unless-stopped
     ports:
       - "8081:80"
     volumes:
