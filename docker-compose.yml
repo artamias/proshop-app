@@ -11,6 +11,9 @@ services:
       - mongo-data:/data/db
     expose:
       - 27017
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD}
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongosh --quiet
       interval: 10s
@@ -20,7 +23,7 @@ services:
 
 # BACKEND
   backend-proshopv2-1:
-    image: proshopv2-backend:v6
+    image: backend-proshop:v1
     container_name: backend-proshopv2-1
     restart: unless-stopped
     expose:
@@ -35,7 +38,7 @@ services:
       - mongodb-proshopv2
 
   backend-proshopv2-2:
-    image: proshopv2-backend:v6
+    image: backend-proshop:v1
     container_name: backend-proshopv2-2
     restart: unless-stopped
     expose:
@@ -51,7 +54,7 @@ services:
 
 # FRONTEND
   frontend-proshopv2:
-    image: proshopv2-frontend:v6
+    image: frontend-proshop:v1
     container_name: frontend-proshopv2-1
     restart: unless-stopped
     expose:
