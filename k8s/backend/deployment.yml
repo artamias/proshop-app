@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: proshop
+spec:
+  replicas: 3           # menggantikan backend-1 dan backend-2 di compose
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: backend-proshop:v1
+          ports:
+            - containerPort: 5000
+          env:
+            - name: NODE_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: proshop-config
+                  key: NODE_ENV
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: proshop-config
+                  key: PORT
+            - name: CORS_ORIGIN
+              valueFrom:
+                configMapKeyRef:
+                  name: proshop-config
+                  key: CORS_ORIGIN
+            - name: MONGO_URI
+              valueFrom:
+                secretKeyRef:
+                  name: proshop-secret
+                  key: MONGO_URI
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: proshop-secret
+                  key: JWT_SECRET
+          readinessProbe:          # menggantikan depends_on
+            httpGet:
+              path: /api/products
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 5
