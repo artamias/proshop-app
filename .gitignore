@@ -31,4 +31,4 @@ uploads/*jpg
 http
 
 #kubernetes secret
-k8s/secret.yml
+/k8s/secret.yml
