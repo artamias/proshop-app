@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 dotenv.config();
+import fs from 'fs';
 import connectDB from './config/db.js';
 import productRoutes from './routes/productRoutes.js';
 import userRoutes from './routes/userRoutes.js';
@@ -21,7 +22,7 @@ const app = express();
 // API Communication
 app.use(cors({
   origin: process.env.NODE_ENV === 'production'
-    ? process.env.CORS_ORIGIN //set to docker compose
+    ? process.env.CORS_ORIGIN
     : true,
   credentials: true,
 }));
@@ -45,6 +46,16 @@ app.get('/api/health', (req, res) => {
     hostname: os.hostname()
   });
 });
+
+const uploadDir =
+  process.env.NODE_ENV === 'production'
+    ? '/var/data/uploads'
+    : path.resolve('uploads');
+
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+  console.log(`Created upload directory: ${uploadDir}`);
+}
 
 if (process.env.NODE_ENV === 'production') {
   const __dirname = path.resolve();

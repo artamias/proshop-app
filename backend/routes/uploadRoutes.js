@@ -4,9 +4,15 @@ import multer from 'multer';
 
 const router = express.Router();
 
+// path absolute refers to env
+const uploadDir =
+  process.env.NODE_ENV === 'production'
+    ? '/var/data/uploads'
+    : path.resolve('uploads');
+
 const storage = multer.diskStorage({
   destination(req, file, cb) {
-    cb(null, 'uploads/');
+    cb(null, uploadDir);
   },
   filename(req, file, cb) {
     cb(
@@ -31,19 +37,17 @@ function fileFilter(req, file, cb) {
 }
 
 const upload = multer({ storage, fileFilter });
-const uploadSingleImage = upload.single('image');
 
-router.post('/', (req, res) => {
-  uploadSingleImage(req, res, function (err) {
-    if (err) {
-      return res.status(400).send({ message: err.message });
-    }
-
+router.post('/', upload.single('image'), (req, res) => {
+  if (req.file) {
+    //return url path
     res.status(200).send({
       message: 'Image uploaded successfully',
-      image: `/${req.file.path}`,
+      image: `/uploads/${req.file.filename}`,
     });
-  });
+  } else {
+    res.status(400).send({ message: 'No image file provided' });
+  }
 });
 
 export default router;

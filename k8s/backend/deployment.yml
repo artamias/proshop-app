@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: artami/backend-proshop:v1
+          image: artami/backend-proshop:v3
           ports:
             - containerPort: 5000
           env:
@@ -44,12 +44,18 @@ spec:
                 secretKeyRef:
                   name: proshop-secret
                   key: JWT_SECRET
+
+          volumeMounts:
+            - name: uploads
+              mountPath: /var/data/uploads
+
           readinessProbe:
             httpGet:
               path: /api/products
               port: 5000
             initialDelaySeconds: 10
             periodSeconds: 5
+          
           livenessProbe:
             httpGet:
               path: /api/products
@@ -58,3 +64,8 @@ spec:
             periodSeconds: 5
             timeoutSeconds: 2
             failureThreshold: 3
+
+      volumes:
+      - name: uploads
+        persistentVolumeClaim:
+          claimName: uploads-pvc
