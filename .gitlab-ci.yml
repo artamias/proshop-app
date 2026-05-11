@@ -48,11 +48,9 @@ test-frontend:
 test-backend:
   stage: test
   image: node:20-alpine
-  script:
-    # - cd backend
-    - npm install
-    # Menggunakan '|| true' jika script test belum didefinisikan di package.json
-    - npm test || echo "Warning: No tests defined for backend"
+  script: |
+    npm install
+    npm test || echo "Warning: No tests defined for backend"
   rules:
     - changes:
         - backend/**/*
