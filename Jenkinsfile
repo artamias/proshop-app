@@ -2,7 +2,6 @@ pipeline {
 
     agent any
 
-    // ── Options ──────────────────────────────────────────────
     options {
         timestamps()
         disableConcurrentBuilds()
@@ -10,15 +9,13 @@ pipeline {
         timeout(time: 30, unit: 'MINUTES')
     }
 
-    // ── Environment Variables ─────────────────────────────────
     environment {
-        REGISTRY       = "registry.gitlab.com"
-        PROJECT_PATH   = "artamias/devops-app"
-        BACKEND_IMAGE  = "${REGISTRY}/${PROJECT_PATH}/backend"
-        FRONTEND_IMAGE = "${REGISTRY}/${PROJECT_PATH}/frontend"
+        DOCKERHUB_USER = "artami"
+        BACKEND_IMAGE  = "${DOCKERHUB_USER}/devops-app-backend"
+        FRONTEND_IMAGE = "${DOCKERHUB_USER}/devops-app-frontend"
+        REGISTRY_CREDS = "dockerhub-credentials"
     }
 
-    // ── Stages ───────────────────────────────────────────────
     stages {
 
         // ── 1. CHECKOUT ───────────────────────────────────────
@@ -121,30 +118,36 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: env.REGISTRY_CREDS,
-                    usernameVariable: 'REG_USER',
-                    passwordVariable: 'REG_PASS'
+                    usernameVariable: 'DH_USER',   // Docker Hub username
+                    passwordVariable: 'DH_TOKEN'   // Docker Hub access token
                 )]) {
                     sh '''
-                        echo "$REG_PASS" | docker login $REGISTRY \
-                            -u "$REG_USER" --password-stdin
+                        # Login ke Docker Hub (tanpa URL = default ke hub.docker.com)
+                        echo "${DH_TOKEN}" | docker login -u "${DH_USER}" --password-stdin
 
+                        # ── Backend ──
                         docker build \
                             --label "git.commit=${SHORT_SHA}" \
                             --label "build.number=${BUILD_NUMBER}" \
                             -t ${BACKEND_IMAGE}:${SHORT_SHA} \
                             -t ${BACKEND_IMAGE}:latest \
                             ./backend
+
                         docker push ${BACKEND_IMAGE}:${SHORT_SHA}
                         docker push ${BACKEND_IMAGE}:latest
 
+                        # ── Frontend ──
                         docker build \
                             --label "git.commit=${SHORT_SHA}" \
                             --label "build.number=${BUILD_NUMBER}" \
                             -t ${FRONTEND_IMAGE}:${SHORT_SHA} \
                             -t ${FRONTEND_IMAGE}:latest \
                             ./frontend
+
                         docker push ${FRONTEND_IMAGE}:${SHORT_SHA}
                         docker push ${FRONTEND_IMAGE}:latest
+
+                        docker logout
                     '''
                 }
             }
@@ -158,22 +161,24 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: env.REGISTRY_CREDS,
-                    usernameVariable: 'TRIVY_USERNAME',
-                    passwordVariable: 'TRIVY_PASSWORD'
+                    usernameVariable: 'DH_USER',
+                    passwordVariable: 'DH_TOKEN'
                 )]) {
                     sh '''
+                        # ── Scan Backend ──
                         docker run --rm \
-                            -e TRIVY_USERNAME=${TRIVY_USERNAME} \
-                            -e TRIVY_PASSWORD=${TRIVY_PASSWORD} \
+                            -e TRIVY_USERNAME="${DH_USER}" \
+                            -e TRIVY_PASSWORD="${DH_TOKEN}" \
                             aquasec/trivy:latest image \
                                 --severity HIGH,CRITICAL \
                                 --exit-code 0 \
                                 --format table \
                                 ${BACKEND_IMAGE}:${SHORT_SHA}
 
+                        # ── Scan Frontend ──
                         docker run --rm \
-                            -e TRIVY_USERNAME=${TRIVY_USERNAME} \
-                            -e TRIVY_PASSWORD=${TRIVY_PASSWORD} \
+                            -e TRIVY_USERNAME="${DH_USER}" \
+                            -e TRIVY_PASSWORD="${DH_TOKEN}" \
                             aquasec/trivy:latest image \
                                 --severity HIGH,CRITICAL \
                                 --exit-code 0 \
@@ -192,7 +197,7 @@ pipeline {
             echo "PIPELINE SUCCESS | Branch: ${env.BRANCH_NAME} | Commit: ${env.SHORT_SHA} | Build: #${env.BUILD_NUMBER}"
         }
         failure {
-            echo "PIPELINE FAILED  | Stage: ${env.STAGE_NAME} | Branch: ${env.BRANCH_NAME} | Commit: ${env.SHORT_SHA}"
+            echo "PIPELINE FAILED | Stage: ${env.STAGE_NAME} | Branch: ${env.BRANCH_NAME} | Commit: ${env.SHORT_SHA}"
         }
         always {
             sh '''
