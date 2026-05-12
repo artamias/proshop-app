@@ -108,7 +108,7 @@ pipeline {
 
                         # ── Backend ──
                         docker build \
-                            --label "git.commit=${SHORT_SHA}" \   
+                            --label "git.commit=${SHORT_SHA}" \
                             --label "build.number=${BUILD_NUMBER}" \
                             -t ${BACKEND_IMAGE}:${SHORT_SHA} \
                             -t ${BACKEND_IMAGE}:latest \
