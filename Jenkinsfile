@@ -1,6 +1,5 @@
 pipeline {
 
-    // Agent utama pakai unix socket, BUKAN docker agent per-stage
     agent any
 
     options {
