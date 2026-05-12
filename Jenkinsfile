@@ -13,7 +13,7 @@ pipeline {
         DOCKERHUB_USER = "artami"
         BACKEND_IMAGE  = "${DOCKERHUB_USER}/devops-app-backend"
         FRONTEND_IMAGE = "${DOCKERHUB_USER}/devops-app-frontend"
-        REGISTRY_CREDS = "dockerhub-credentials"
+        REGISTRY_CREDS = "dockerhub"
     }
 
     stages {
@@ -108,7 +108,7 @@ pipeline {
 
                         # ── Backend ──
                         docker build \
-                            --label "git.commit=${SHORT_SHA}" \
+                            --label "git.commit=${SHORT_SHA}" \   
                             --label "build.number=${BUILD_NUMBER}" \
                             -t ${BACKEND_IMAGE}:${SHORT_SHA} \
                             -t ${BACKEND_IMAGE}:latest \
